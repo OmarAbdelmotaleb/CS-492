@@ -93,6 +93,7 @@ static int image_read(struct blkdev *dev, int first_blk, int nblks, void *buf)
 static int image_write(struct blkdev * dev, int first_blk, int nblks, void *buf)
 {
 	//CS492: your code here
+	// Omar and Ben
 	return -1;
 }
 
