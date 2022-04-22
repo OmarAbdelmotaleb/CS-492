@@ -5,9 +5,6 @@
  * Peter Desnoyers, Northeastern Computer Science, 2011
  * Philip Gust, Northeastern Computer Science, 2019
  *
- * Changing
- * Stuff
- * Here
  */
 
 #define _XOPEN_SOURCE 500
@@ -97,7 +94,6 @@ static int image_read(struct blkdev *dev, int first_blk, int nblks, void *buf)
 static int image_write(struct blkdev * dev, int first_blk, int nblks, void *buf)
 {
 	//CS492: your code here
-	// Omar and Ben
 	return -1;
 }
 
