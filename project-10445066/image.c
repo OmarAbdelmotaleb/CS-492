@@ -5,7 +5,6 @@
  * Peter Desnoyers, Northeastern Computer Science, 2011
  * Philip Gust, Northeastern Computer Science, 2019
  *
- * Test
  */
 
 #define _XOPEN_SOURCE 500
