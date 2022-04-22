@@ -5,9 +5,12 @@
  * Peter Desnoyers, Northeastern Computer Science, 2011
  * Philip Gust, Northeastern Computer Science, 2019
  *
+<<<<<<< HEAD
  * Changing
  * Stuff
  * Here
+=======
+>>>>>>> 6864a42a2f63eceaf551fcf07bd6176094bf870d
  */
 
 #define _XOPEN_SOURCE 500
