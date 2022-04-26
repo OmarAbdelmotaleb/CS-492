@@ -94,7 +94,27 @@ static int image_read(struct blkdev *dev, int first_blk, int nblks, void *buf)
 static int image_write(struct blkdev * dev, int first_blk, int nblks, void *buf)
 {
 	//CS492: your code here
-	return -1;
+	struct image_dev *im = dev->private;
+
+	if (im->fd == -1) {
+		return E_UNAVAIL;
+	}
+
+	// Is the super block just when first_blk equals 0?
+	if (first_blk == 0) {
+		printf("Warning, you're writing to the superblock\n");
+	}
+	int result = pwrite(im->fd, buf, nblks*BLOCK_SIZE, first_blk*BLOCK_SIZE);
+
+	if (result < 0) {
+		fprintf(stderr, "write error on %s: %s\n", im->path, strerror(errno));
+		assert(0);
+	}
+	if (result != nblks*BLOCK_SIZE) {
+		fprintf(stderr, "short write on %s: %s\n", im->path, strerror(errno));
+		assert(0);
+	}
+	return SUCCESS;
 }
 
 /**
@@ -109,8 +129,13 @@ static int image_write(struct blkdev * dev, int first_blk, int nblks, void *buf)
 */
 static int image_flush(struct blkdev * dev, int first_blk, int nblks)
 {
-	//CS492: your code here
-	return -1;
+	struct image_dev *im = dev->private;
+
+	if (im->fd == -1) {
+		return E_UNAVAIL;
+	}
+
+	return SUCCESS;
 }
 
 /**
@@ -123,6 +148,13 @@ static int image_flush(struct blkdev * dev, int first_blk, int nblks)
 static void image_close(struct blkdev *dev)
 {
 	//CS492: your code here
+	struct image_dev *im = dev->private;
+
+	int result = close(im->fd);
+
+	free(im);
+	free(dev);
+
 }
 
 /** Operations on this block device */
@@ -149,7 +181,7 @@ struct blkdev *image_create(char *path)
 		return NULL;
 
 	im->path = strdup(path); /* save a copy for error reporting */
-	
+
 	/* open image device */
 	im->fd = open(path, O_RDWR);
 	if (im->fd < 0) {
