@@ -421,30 +421,31 @@ void* fs_init(struct fuse_conn_info *conn)
 	
 	if( disk->ops->read(disk, 0, 1, &sb) ) exit(1);
 
-	root_inode = 42;
+	root_inode = sb.root_inode; // What is this
 
 	/* The inode map and block map are directly after the superblock */
 	// read inode map
 	//CS492: your code below
 	inode_map_base = 1; // This is correct.
-	inode_map = NULL;
-
-
+	inode_map = malloc(sb.inode_map_sz * FS_BLOCK_SIZE); // 1024 * size in block for malloc
+	
+	if( disk->ops->read(disk, inode_map_base, 1, &inode_map) ) exit(1);
 
 	// read block map
 	//CS492: your code below
-	block_map_base = 42;
-	block_map = NULL;
+	block_map_base = 1 + sb.inode_map_sz; // 1 + inode_map_sz
+	block_map = malloc(sb.block_map_sz * FS_BLOCK_SIZE);
 
-
+	// Is num_blks 1 for everything?
+	if( disk->ops->read(disk, block_map_base, 1, &block_map) ) exit(1);
 
 	/* The inode data is in the next set of blocks */
 	//CS492: your code below
-	inode_base = 42;
-	n_inodes = 42;
-	inodes = NULL;
+	inode_base = 1 + sb.inode_map_sz + sb.block_map_sz; // 1 + inode_map_sz + block_map_sz
+	n_inodes = INODES_PER_BLK * sb.inode_region_sz;
+	inodes = malloc(sb.inode_region_sz * FS_BLOCK_SIZE);
 
-
+	if( disk->ops->read(disk, inode_base, n_inodes, &inodes) ) exit(1);
 
 	// number of blocks on device
 	n_blocks = sb.num_blocks;
