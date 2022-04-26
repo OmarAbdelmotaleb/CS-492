@@ -418,8 +418,8 @@ void* fs_init(struct fuse_conn_info *conn)
 	// read the superblock
 	//CS492: your code below
 	struct fs_super sb;
-
-
+	
+	if( disk->ops->read(disk, 0, 1, &sb) ) exit(1);
 
 	root_inode = 42;
 
