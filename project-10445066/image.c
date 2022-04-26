@@ -39,8 +39,8 @@ struct image_dev {
 */
 static int image_num_blocks(struct blkdev *dev)
 {
-	//CS492: your code here
-	return -1;
+	struct image_dev *im = dev->private;
+	return im->nblks;
 }
 
 
