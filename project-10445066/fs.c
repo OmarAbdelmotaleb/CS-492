@@ -1115,7 +1115,7 @@ static size_t fs_write_dir(size_t inode_idx, const char *buf, size_t len, size_t
 	size_t len_to_write = len;
 	while (blk_num < N_DIRECT && len_to_write > 0) {
 		size_t cur_len_to_write = len_to_write > BLOCK_SIZE ? (size_t) BLOCK_SIZE - blk_offset : len_to_write;
-		size_t temp = blk_offset + cur_len_to_write;
+		size_t temp = cur_len_to_write;
 
 		if (!inode->direct[blk_num]) {
 			int freeb = get_free_blk();
