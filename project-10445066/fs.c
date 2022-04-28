@@ -838,6 +838,7 @@ static int fs_unlink(const char *path)
 			memset(&entries[i], 0, sizeof(struct fs_dirent));
 		}
 	}
+
 	if (disk->ops->write(disk, parent_inode->direct[0], 1, entries) < 0)
 		exit(1);
 
@@ -868,6 +869,8 @@ static int fs_unlink(const char *path)
 */
 static int fs_rmdir(const char *path)
 {
+	// CHECK WITH TA OR PROFESSOR
+
 	//can not remove root
 	if (strcmp(path, "/") == 0) return -EINVAL;
 
@@ -894,8 +897,16 @@ static int fs_rmdir(const char *path)
 
 	//remove entry from parent dir
 	//CS492: your code below
-
-
+	if (disk->ops->read(disk, parent_inode->direct[0], 1, entries) < 0)
+		exit(1);
+	for (int i = 0; i < DIRENTS_PER_BLK; i++) {
+		if (entries[i].valid && strcmp(entries[i].name, name) == 0) {
+			memset(&entries[i], 0, sizeof(struct fs_dirent));
+		}
+	}
+	
+	if (disk->ops->write(disk, parent_inode->direct[0], 1, entries) < 0)
+		exit(1);
 
 	//return blk and clear inode
 	return_blk(inode->direct[0]);
@@ -1004,13 +1015,24 @@ static int fs_chmod(const char *path, mode_t mode)
  * @param path the file or directory path.
  * @param ut utimbuf - see man 'utime' for description.
  * @return 0 if successful, or error value
- *   -ENOENT   - file does not exist
+ *   -ENOENT   - file does not exist 
  *   -ENOTDIR  - component of path not a directory
  */
 int fs_utime(const char *path, struct utimbuf *ut)
 {
-	//CS492: your code here
-	return -1;
+	char *_path = strdup(path);
+	char name[FS_FILENAME_SIZE];
+	int inode_idx = translate(_path);
+	int parent_inode_idx = translate_1(_path, name);
+	struct fs_inode *inode = &inodes[inode_idx];
+	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
+	if (inode_idx < 0 || parent_inode_idx < 0) return -ENOENT;
+
+	if(!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
+	
+	inode->mtime = ut->modtime; // ??
+
+	return SUCCESS;
 }
 
 /**
