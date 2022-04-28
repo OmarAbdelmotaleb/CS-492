@@ -93,6 +93,8 @@ static int image_read(struct blkdev *dev, int first_blk, int nblks, void *buf)
 */
 static int image_write(struct blkdev * dev, int first_blk, int nblks, void *buf)
 {
+	// Derived from image_read function
+
 	//CS492: your code here
 	struct image_dev *im = dev->private;
 
@@ -129,7 +131,7 @@ static int image_write(struct blkdev * dev, int first_blk, int nblks, void *buf)
 static int image_flush(struct blkdev * dev, int first_blk, int nblks)
 {
 	struct image_dev *im = dev->private;
-
+	// Check if file descriptor for the image_dev is -1.
 	if (im->fd == -1) {
 		return E_UNAVAIL;
 	}

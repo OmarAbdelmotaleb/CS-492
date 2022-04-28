@@ -419,36 +419,49 @@ void* fs_init(struct fuse_conn_info *conn)
 	//CS492: your code below
 	struct fs_super sb;
 
-	if( disk->ops->read(disk, 0, 1, &sb) ) exit(1);
+	/*
+		0		1		2			   3
+	-----------------------------------------------
+	| Super | Inode  | Inodes |    Data blocks    | 
+	| Block | Bitmap |        |					  |
+	-----------------------------------------------
+		0	>>	1	>>	1 + 		>>	1 + inode_map_sz
+					  inode_map_Sz		  + inode_region_sz
+	*/
 
-	root_inode = sb.root_inode; // What is this
+	// Read 1 block from disk at block 0 into the superblock sb 
+	if( disk->ops->read(disk, 0, 1, &sb) ) exit(1); 
+	root_inode = sb.root_inode; // Set root_inode to the root_inode read to sb
 
 	/* The inode map and block map are directly after the superblock */
 	// read inode map
 	//CS492: your code below
-	inode_map_base = 1; // This is correct.
+	inode_map_base = 1; // This is correct. Index 1
 	inode_map = malloc(sb.inode_map_sz * FS_BLOCK_SIZE); // 1024 * size in block for malloc
 
+	// Read 1 block from disk at inode map block into inode_map 
 	if( disk->ops->read(disk, inode_map_base, 1, &inode_map) ) exit(1);
 
 	// read block map
 	//CS492: your code below
-	block_map_base = 1 + sb.inode_map_sz; // 1 + inode_map_sz
-	block_map = malloc(sb.block_map_sz * FS_BLOCK_SIZE);
+	block_map_base = 1 + sb.inode_map_sz; // Index 1 + size of inode map
+	block_map = malloc(sb.block_map_sz * FS_BLOCK_SIZE); // 1024 * size in block for malloc
 
-	// Is num_blks 1 for everything?
+	// Read 1 block from disk at block bitmap into the block_map
 	if( disk->ops->read(disk, block_map_base, 1, &block_map) ) exit(1);
 
 	/* The inode data is in the next set of blocks */
 	//CS492: your code below
-	inode_base = 1 + sb.inode_map_sz + sb.block_map_sz; // 1 + inode_map_sz + block_map_sz
-	n_inodes = INODES_PER_BLK * sb.inode_region_sz;
-	inodes = malloc(sb.inode_region_sz * FS_BLOCK_SIZE);
+	inode_base = 1 + sb.inode_map_sz + sb.block_map_sz; // Same logic as previous
+	// The number of inodes in the amount of inodes per block * the size of the inodes region
+	n_inodes = INODES_PER_BLK * sb.inode_region_sz; 
+	inodes = malloc(sb.inode_region_sz * FS_BLOCK_SIZE); // 1024 * size in block for malloc
 
+	// Read n_inodes block from disk at inode block into the inodes
 	if( disk->ops->read(disk, inode_base, n_inodes, &inodes) ) exit(1);
 
 	// number of blocks on device
-	n_blocks = sb.num_blocks;
+	n_blocks = sb.num_blocks; // Set number of blocks from the superblock
 
 	// dirty metadata blocks
 	dirty_len = inode_base + sb.inode_region_sz;
@@ -675,7 +688,10 @@ static int fs_mknod(const char *path, mode_t mode, dev_t dev)
 */
 static int fs_mkdir(const char *path, mode_t mode)
 {
-	//CS492: your code here
+
+	// Derived from fs_mknod with adjustments to create a directory
+
+	//get current and parent inodes
 	mode |= S_IFDIR;
 	if (!S_ISDIR(mode) || strcmp(path, "/") == 0) return -EINVAL;
 	char *_path = strdup(path);
@@ -684,19 +700,21 @@ static int fs_mkdir(const char *path, mode_t mode)
 	int parent_inode_idx = translate_1(_path, name);
 	if (inode_idx >= 0) return -EEXIST;
 	if (parent_inode_idx < 0) return parent_inode_idx;
-
+	// read parent info
 	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
-	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
+	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR; 
 
 	struct fs_dirent entries[DIRENTS_PER_BLK]; //Should this be INODES_PER_BLK instead?
 	// Also, what/where is entries?
 	memset(entries, 0, DIRENTS_PER_BLK * sizeof(struct fs_dirent));
 	if (disk->ops->read(disk, parent_inode->direct[0], 1, entries) < 0)
 		exit(1);
-
+		
+	//assign inode and directory and update
 	int res = set_attributes_and_update(entries, name, mode, true);
 	if (res < 0) return res;
 
+	//write entries buffer into disk
 	if (disk->ops->write(disk, parent_inode->direct[0], 1, entries) < 0)
 		exit(1);
 	return SUCCESS;
@@ -840,7 +858,7 @@ static int fs_unlink(const char *path)
  * @param path: the path of the directory
  *
  * @return: 0 if successful, or -error number
- * 	-ENOENT   - file does not exist
+ * 		-ENOENT   - file does not exist
  *  	-ENOTDIR  - component of path not a directory
  *  	-ENOTDIR  - path not a directory
  *  	-ENOEMPTY - directory not empty
@@ -855,13 +873,15 @@ static int fs_rmdir(const char *path)
 
 	//get inodes and check
 	//CS492: your code below
-	char *_path = NULL;
-	char name[1];
-	int inode_idx = 42;
-	int parent_inode_idx = 42;
-	struct fs_inode *inode = NULL;
-	struct fs_inode *parent_inode = NULL;
-
+	char *_path = strdup(path);
+	char name[FS_FILENAME_SIZE]; // Does this need to be changed?
+	int inode_idx = translate(_path);
+	int parent_inode_idx = translate_1(_path, name);
+	struct fs_inode *inode = &inodes[inode_indx];
+	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
+	if (inode_idx < 0 || parent_inode_idx < 0) return -ENOENT;
+	
+	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
 
 
 	//check if dir if empty
