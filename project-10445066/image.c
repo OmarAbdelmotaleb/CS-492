@@ -100,7 +100,6 @@ static int image_write(struct blkdev * dev, int first_blk, int nblks, void *buf)
 		return E_UNAVAIL;
 	}
 
-	// Is the super block just when first_blk equals 0?
 	if (first_blk == 0) {
 		printf("Warning, you're writing to the superblock\n");
 	}
@@ -120,7 +119,7 @@ static int image_write(struct blkdev * dev, int first_blk, int nblks, void *buf)
 /**
  * Flush the block device.
  * @param dev: the block device
- * @aparam first_blk: index of the block to start flushing 
+ * @aparam first_blk: index of the block to start flushing
  * @param nblks: number of blocks to flush
  * @return SUCCESS if successful, E_UNAVAIL if device unavailable
  *

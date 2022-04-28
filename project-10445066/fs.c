@@ -676,7 +676,30 @@ static int fs_mknod(const char *path, mode_t mode, dev_t dev)
 static int fs_mkdir(const char *path, mode_t mode)
 {
 	//CS492: your code here
-	return -1;
+	mode |= S_IFDIR;
+	if (!S_ISDIR(mode) || strcmp(path, "/") == 0) return -EINVAL;
+	char *_path = strdup(path);
+	char name[FS_FILENAME_SIZE];
+	int inode_idx = translate(_path);
+	int parent_inode_idx = translate_1(_path, name);
+	if (inode_idx >= 0) return -EEXIST;
+	if (parent_inode_idx < 0) return parent_inode_idx;
+
+	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
+	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
+
+	struct fs_dirent entries[DIRENTS_PER_BLK]; //Should this be INODES_PER_BLK instead?
+	// Also, what/where is entries?
+	memset(entries, 0, DIRENTS_PER_BLK * sizeof(struct fs_dirent));
+	if (disk->ops->read(disk, parent_inode->direct[0], 1, entries) < 0)
+		exit(1);
+
+	int res = set_attributes_and_update(entries, name, mode, true);
+	if (res < 0) return res;
+
+	if (disk->ops->write(disk, parent_inode->direct[0], 1, entries) < 0)
+		exit(1);
+	return SUCCESS;
 }
 
 static void fs_truncate_dir(uint32_t *de) {
