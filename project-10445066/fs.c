@@ -880,7 +880,7 @@ static int fs_rmdir(const char *path)
 	char name[FS_FILENAME_SIZE]; // Does this need to be changed?
 	int inode_idx = translate(_path);
 	int parent_inode_idx = translate_1(_path, name);
-	struct fs_inode *inode = &inodes[inode_indx];
+	struct fs_inode *inode = &inodes[inode_idx];
 	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
 	if (inode_idx < 0 || parent_inode_idx < 0) return -ENOENT;
 	
