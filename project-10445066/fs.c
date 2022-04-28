@@ -418,7 +418,7 @@ void* fs_init(struct fuse_conn_info *conn)
 	// read the superblock
 	//CS492: your code below
 	struct fs_super sb;
-	
+
 	if( disk->ops->read(disk, 0, 1, &sb) ) exit(1);
 
 	root_inode = sb.root_inode; // What is this
@@ -428,7 +428,7 @@ void* fs_init(struct fuse_conn_info *conn)
 	//CS492: your code below
 	inode_map_base = 1; // This is correct.
 	inode_map = malloc(sb.inode_map_sz * FS_BLOCK_SIZE); // 1024 * size in block for malloc
-	
+
 	if( disk->ops->read(disk, inode_map_base, 1, &inode_map) ) exit(1);
 
 	// read block map
