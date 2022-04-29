@@ -459,7 +459,7 @@ void* fs_init(struct fuse_conn_info *conn)
 
 	// Read n_inodes block from disk at inode block into the inodes
 	// Changed n_inodes to 1
-	if( disk->ops->read(disk, inode_base, n_inodes, &inodes) ) exit(1);
+	if( disk->ops->read(disk, inode_base, 1, &inodes) ) exit(1);
 
 	// number of blocks on device
 	n_blocks = sb.num_blocks; // Set number of blocks from the superblock
