@@ -877,7 +877,7 @@ static int fs_rmdir(const char *path)
 	//get inodes and check
 	//CS492: your code below
 	char *_path = strdup(path);
-	char name[FS_FILENAME_SIZE]; // Does this need to be changed?
+	char name[FS_FILENAME_SIZE];
 	int inode_idx = translate(_path);
 	int parent_inode_idx = translate_1(_path, name);
 	struct fs_inode *inode = &inodes[inode_idx];
@@ -1026,7 +1026,7 @@ int fs_utime(const char *path, struct utimbuf *ut)
 	int parent_inode_idx = translate_1(_path, name);
 	struct fs_inode *inode = &inodes[inode_idx];
 	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
-	if (inode_idx < 0 || parent_inode_idx < 0) return -ENOENT;
+	if (inode_idx < 0) return -ENOENT;
 
 	if(!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
 
@@ -1171,17 +1171,16 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	char name[FS_FILENAME_SIZE];
 	int inode_idx = translate(_path);
 	int parent_inode_idx = translate_1(_path, name);
-	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
-	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
-	if (inode_idx < 0) return inode_idx;
 	struct fs_inode *inode = &inodes[inode_idx];
-	if (S_ISDIR(inode->mode)) return -EISDIR;
-	int file_len = inode->size; // How to obtain file length :)
-	if (offset >= file_len) return 0;
-	if (offset+len > file_len) return len - offset; // To EOF?
+	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
+	int file_len = inode->size;
 
 	//len need to read
 	size_t len_to_read = len;
+	
+	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
+	if (inode_idx < 0) return inode_idx;
+	if (S_ISDIR(inode->mode)) return -EISDIR;
 
 	if (len_to_read > file_len) {
 		return -EIO;
@@ -1203,8 +1202,9 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		size_t temp = fs_read_indir2(inode->indir_2, buf, len_to_read, (size_t) offset - DIR_SIZE - INDIR1_SIZE);
 	}
 
-	// Do the exceptions occur at the end? YES
-	return len; //By requested does it mean len? YES WITH EXCEPTIONS
+	if (offset >= file_len) return 0;
+	if (offset+len > file_len) return len - offset; // To EOF?
+	return len; 
 }
 
 static void fs_write_blk(int blk_num, const char *buf, size_t len, size_t offset) {
