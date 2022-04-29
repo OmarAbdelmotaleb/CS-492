@@ -1153,9 +1153,9 @@ static size_t fs_read_indir2(size_t blk, char *buf, size_t len, size_t offset) {
  * - if offset >= file len, return 0 
  * - if offset+len > file len, return bytes from offset to EOF
  * - on error, return <0 
- * 	-ENOENT  - file does not exist
+ * 	-ENOENT  - file does not exist ^
  * 	-EISDIR  - file is in fact a directory ^
- * 	-ENOTDIR - component of path not a directory
+ * 	-ENOTDIR - component of path not a directory ^
  * 	-EIO     - error reading block ^
  *
  * Note: similar to fs_write, except that:
@@ -1183,6 +1183,11 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	if (offset >= file_len) return 0;
 	if (offset+len > file_len) return len - offset; // To EOF?
 	
+	// Should we also do || parent_inode_idx < 0??
+	if (inode_idx < 0) {
+		return -ENOENT;
+	}
+
 	//len need to read
 	size_t len_to_read = len;
 	
@@ -1193,6 +1198,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	//read direct blocks
 	if (len_to_read > 0 && offset < DIR_SIZE) {
 		size_t temp = fs_read_dir(inode_idx, buf, len_to_read, (size_t) offset);
+		//By no need to update, we don't do anything past this?
 	}
 
 	//read indirect 1 blocks
