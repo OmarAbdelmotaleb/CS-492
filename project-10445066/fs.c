@@ -1029,8 +1029,10 @@ int fs_utime(const char *path, struct utimbuf *ut)
 	if (inode_idx < 0 || parent_inode_idx < 0) return -ENOENT;
 
 	if(!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
+
+	// Can we just set mtime equal to the modified time?
+	inode->mtime = ut->modtime; 
 	
-	inode->mtime = ut->modtime; // ??
 
 	return SUCCESS;
 }
@@ -1056,7 +1058,11 @@ static int fs_open(const char *path, struct fuse_file_info *fi)
 }
 
 static void fs_read_blk(int blk_num, char *buf, size_t len, size_t offset) {
-	//CS492: your code here
+	char entries[BLOCK_SIZE];
+	memset(entries, 0, BLOCK_SIZE);
+	if (disk->ops->read(disk, blk_num, 1, entries) < 0) exit(1);
+	// memcpy(entries + offset, buf, len);
+	// if (disk->ops->write(disk, blk_num, 1, entries) < 0) exit(1);
 }
 
 static size_t fs_read_dir(size_t inode_idx, char *buf, size_t len, size_t offset) {
@@ -1144,13 +1150,13 @@ static size_t fs_read_indir2(size_t blk, char *buf, size_t len, size_t offset) {
  * @param fi: fuse file info
  *
  * @return: return exactly the number of bytes requested, except:
- * - if offset >= file len, return 0
+ * - if offset >= file len, return 0 
  * - if offset+len > file len, return bytes from offset to EOF
- * - on error, return <0
+ * - on error, return <0 
  * 	-ENOENT  - file does not exist
- * 	-EISDIR  - file is in fact a directory
+ * 	-EISDIR  - file is in fact a directory ^
  * 	-ENOTDIR - component of path not a directory
- * 	-EIO     - error reading block
+ * 	-EIO     - error reading block ^
  *
  * Note: similar to fs_write, except that:
  * 1) we cannot read past the end of the file (so you need to add a test
@@ -1162,7 +1168,45 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		    struct fuse_file_info *fi)
 {
 	//CS492: your code here
-	return -1;
+	// fs_write doesnt return -ENOTDIR anywhere. Mistake?
+
+	char *_path = strdup(path);
+	char name[FS_FILENAME_SIZE];
+	int inode_idx = translate(_path);
+	int parent_inode_idx = translate_1(_path, name);
+	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
+	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
+	if (inode_idx < 0) return inode_idx;
+	struct fs_inode *inode = &inodes[inode_idx];
+	if (S_ISDIR(inode->mode)) return -EISDIR;
+	int file_len = 0; // How to obtain file length :)
+	if (offset >= file_len) return 0;
+	if (offset+len > file_len) return len - offset; // To EOF?
+	
+	//len need to read
+	size_t len_to_read = len;
+	
+	if (len_to_read > file_len) {
+		return -EIO;
+	}
+	
+	//read direct blocks
+	if (len_to_read > 0 && offset < DIR_SIZE) {
+		size_t temp = fs_read_dir(inode_idx, buf, len_to_read, (size_t) offset);
+	}
+
+	//read indirect 1 blocks
+	if (len_to_read > 0 && offset < DIR_SIZE + INDIR1_SIZE) {
+		size_t temp = fs_read_dir(inode->indir_1, buf, len_to_read, (size_t) offset - DIR_SIZE);
+	}	
+	
+	//read indirect 2 blocks
+	if (len_to_read > 0 && offset < DIR_SIZE + INDIR1_SIZE + INDIR2_SIZE) {
+		size_t temp = fs_read_indir2(inode->indir_2, buf, len_to_read, (size_t) offset - DIR_SIZE - INDIR1_SIZE);
+	}
+
+	// Do the exceptions occur at the end?
+	return len; //By requested does it mean len?
 }
 
 static void fs_write_blk(int blk_num, const char *buf, size_t len, size_t offset) {
