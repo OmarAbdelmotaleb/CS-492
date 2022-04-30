@@ -45,7 +45,7 @@ static int image_num_blocks(struct blkdev *dev)
 
 
 /**
- * To read blocks from block device starting at give block index
+ * To read blocks from block device starting at give block index into buf
  * @param dev: the block device
  * @param first_blk: index of the block to start reading from
  * @param nblks: number of blocks to read from the device
