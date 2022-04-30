@@ -455,11 +455,11 @@ void* fs_init(struct fuse_conn_info *conn)
 	inode_base = 1 + sb.inode_map_sz + sb.block_map_sz; // Same logic as previous
 	// The number of inodes in the amount of inodes per block * the size of the inodes region
 	n_inodes = INODES_PER_BLK * sb.inode_region_sz; 
-	inodes = malloc(sb.inode_region_sz * n_inodes * FS_BLOCK_SIZE); // 1024 * size in block for malloc
+	inodes = malloc(sb.inode_region_sz * FS_BLOCK_SIZE); // 1024 * size in block for malloc
 
 	// Read n_inodes block from disk at inode block into the inodes
 	// Changed n_inodes to 1
-	if( disk->ops->read(disk, inode_base, 1, &inodes) ) exit(1);
+	if( disk->ops->read(disk, inode_base, n_inodes, &inodes) ) exit(1);
 
 	// number of blocks on device
 	n_blocks = sb.num_blocks; // Set number of blocks from the superblock
