@@ -1186,7 +1186,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	// if (len_to_read > file_len) {
 	// 	return -EIO;
 	// }
-
+	printf("First\n");
 	//read direct blocks
 	if (len_to_read > 0 && offset < DIR_SIZE) {
 		size_t temp = fs_read_dir(inode_idx, buf, len_to_read, (size_t) offset);
@@ -1195,6 +1195,8 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		buf += temp;
 	}
 
+	printf("Second\n");
+
 	//read indirect 1 blocks
 	if (len_to_read > 0 && offset < DIR_SIZE + INDIR1_SIZE) {
 		size_t temp = fs_read_indir1(inode->indir_1, buf, len_to_read, (size_t) offset - DIR_SIZE);
@@ -1202,6 +1204,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		offset += temp;
 		buf += temp;
 	}
+	printf("Third\n");
 
 	//read indirect 2 blocks
 	if (len_to_read > 0 && offset < DIR_SIZE + INDIR1_SIZE + INDIR2_SIZE) {
@@ -1209,9 +1212,11 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		len_to_read -= temp;
 		offset += len_to_read;	
 	}
-
+	printf("Fourth\n");
 	if (offset >= file_len) return 0;
+	printf("Fifth\n");
 	if (offset+len > file_len) return (int) len - offset; // To EOF?
+	printf("Sixth\n");
 	return (int) len; 
 }
 
