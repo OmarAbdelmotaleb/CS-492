@@ -1212,7 +1212,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 
 	if (offset >= file_len) return 0;
 	if (offset+len > file_len) return len - offset; // To EOF?
-	return len; 
+	return (int) len; 
 }
 
 static void fs_write_blk(int blk_num, const char *buf, size_t len, size_t offset) {
