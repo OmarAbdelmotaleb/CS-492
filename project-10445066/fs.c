@@ -1190,7 +1190,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	//read direct blocks
 	if (len_to_read > 0 && offset < DIR_SIZE) {
 		size_t temp = fs_read_dir(inode_idx, buf, len_to_read, (size_t) offset);
-		len_to_write -= temp;
+		len_to_read -= temp;
 		offset += temp;
 		buf += temp;
 	}
@@ -1198,7 +1198,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	//read indirect 1 blocks
 	if (len_to_read > 0 && offset < DIR_SIZE + INDIR1_SIZE) {
 		size_t temp = fs_read_dir(inode->indir_1, buf, len_to_read, (size_t) offset - DIR_SIZE);
-		len_to_write -= temp;
+		len_to_read -= temp;
 		offset += temp;
 		buf += temp;
 	}
@@ -1206,8 +1206,8 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	//read indirect 2 blocks
 	if (len_to_read > 0 && offset < DIR_SIZE + INDIR1_SIZE + INDIR2_SIZE) {
 		size_t temp = fs_read_indir2(inode->indir_2, buf, len_to_read, (size_t) offset - DIR_SIZE - INDIR1_SIZE);
-		len_to_write -= temp;
-		offset += len_to_write;	
+		len_to_read -= temp;
+		offset += len_to_read;	
 	}
 
 	if (offset >= file_len) return 0;
