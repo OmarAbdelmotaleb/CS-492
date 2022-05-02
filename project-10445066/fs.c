@@ -1184,7 +1184,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	if (S_ISDIR(inode->mode)) return -EISDIR;
 
 	if (len_to_read > file_len) {
-		return -EIO;
+		return -EISDIR;
 	}
 
 	//read direct blocks
