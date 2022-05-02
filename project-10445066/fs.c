@@ -1213,10 +1213,10 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		offset += len_to_read;	
 	}
 	printf("Fourth\n");
-	if (offset >= file_len) return 0;
-	printf("Fifth\n");
-	if (offset+len > file_len) return (int) len - offset; // To EOF?
-	printf("Sixth\n");
+	// if (offset >= file_len) return 0;
+	// printf("Fifth\n");
+	// if (offset+len > file_len) return (int) len - offset; // To EOF?
+	// printf("Sixth\n");
 	return (int) len; 
 }
 
