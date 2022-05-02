@@ -32,7 +32,7 @@ extern struct blkdev *disk; //see main.c
 
 /* by defining bitmaps as 'fd_set' pointers, you can use existing
  * macros to handle them.
- *   FD_ISSET(##, inode_map);
+  *   FD_ISSET(##, inode_map);
  *   FD_CLR(##, block_map);
  *   FD_SET(##, block_map);
  */
@@ -422,15 +422,15 @@ void* fs_init(struct fuse_conn_info *conn)
 	/*
 		0		1		2			   3
 	-----------------------------------------------
-	| Super | Inode  | Inodes |    Data blocks    | 
+	| Super | Inode  | Inodes |    Data blocks    |
 	| Block | Bitmap |        |					  |
 	-----------------------------------------------
 		0	>>	1	>>	1 + 		>>	1 + inode_map_sz
 					  inode_map_sz		  + inode_region_sz
 	*/
 
-	// Read 1 block from disk at block 0 into the superblock sb 
-	if( disk->ops->read(disk, 0, 1, &sb) ) exit(1); 
+	// Read 1 block from disk at block 0 into the superblock sb
+	if( disk->ops->read(disk, 0, 1, &sb) ) exit(1);
 	root_inode = sb.root_inode; // Set root_inode to the root_inode read to sb
 
 	/* The inode map and block map are directly after the superblock */
@@ -439,7 +439,7 @@ void* fs_init(struct fuse_conn_info *conn)
 	inode_map_base = 1; // This is correct. Index 1
 	inode_map = malloc(sb.inode_map_sz * FS_BLOCK_SIZE); // 1024 * size in block for malloc
 
-	// Read 1 block from disk at inode map block into inode_map 
+	// Read 1 block from disk at inode map block into inode_map
 	if( disk->ops->read(disk, inode_map_base, sb.inode_map_sz, &inode_map) ) exit(1);
 
 	// read block map
@@ -454,7 +454,7 @@ void* fs_init(struct fuse_conn_info *conn)
 	//CS492: your code below
 	inode_base = 1 + sb.inode_map_sz + sb.block_map_sz; // Same logic as previous
 	// The number of inodes in the amount of inodes per block * the size of the inodes region
-	n_inodes = INODES_PER_BLK * sb.inode_region_sz; 
+	n_inodes = INODES_PER_BLK * sb.inode_region_sz;
 	inodes = malloc(sb.inode_region_sz * FS_BLOCK_SIZE); // 1024 * size in block for malloc
 
 	// Read n_inodes block from disk at inode block into the inodes
@@ -1178,7 +1178,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 
 	//len need to read
 	size_t len_to_read = len;
-	
+
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
 	if (inode_idx < 0) return inode_idx;
 	if (S_ISDIR(inode->mode)) return -EISDIR;
