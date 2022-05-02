@@ -1183,6 +1183,10 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	if (inode_idx < 0) return inode_idx;
 	if (S_ISDIR(inode->mode)) return -EISDIR;
 
+	// if (len_to_read > file_len) {
+	// 	return -EIO;
+	// }
+
 	//read direct blocks
 	if (len_to_read > 0 && offset < DIR_SIZE) {
 		size_t temp = fs_read_dir(inode_idx, buf, len_to_read, (size_t) offset);
@@ -1193,7 +1197,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 
 	//read indirect 1 blocks
 	if (len_to_read > 0 && offset < DIR_SIZE + INDIR1_SIZE) {
-		size_t temp = fs_read_dir(inode->indir_1, buf, len_to_read, (size_t) offset - DIR_SIZE);
+		size_t temp = fs_read_indir1(inode->indir_1, buf, len_to_read, (size_t) offset - DIR_SIZE);
 		len_to_read -= temp;
 		offset += temp;
 		buf += temp;
