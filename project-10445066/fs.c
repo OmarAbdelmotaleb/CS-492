@@ -1180,7 +1180,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	size_t len_to_read = len;
 
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
-	if (inode_idx < 0) return inode_idx;
+	//if (inode_idx < 0) return inode_idx;
 	if (S_ISDIR(inode->mode)) return -EISDIR;
 
 	// if (len_to_read > file_len) {
