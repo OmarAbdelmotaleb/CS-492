@@ -440,7 +440,7 @@ void* fs_init(struct fuse_conn_info *conn)
 	inode_map = malloc(sb.inode_map_sz * FS_BLOCK_SIZE); // 1024 * size in block for malloc
 
 	// Read 1 block from disk at inode map block into inode_map
-	if( disk->ops->read(disk, inode_map_base, sb.inode_map_sz, &inode_map) ) exit(1);
+	if( disk->ops->read(disk, inode_map_base, sb.inode_map_sz, inode_map) ) exit(1);
 
 	// read block map
 	//CS492: your code below
@@ -448,7 +448,7 @@ void* fs_init(struct fuse_conn_info *conn)
 	block_map = malloc(sb.block_map_sz * FS_BLOCK_SIZE); // 1024 * size in block for malloc
 
 	// Read 1 block from disk at block bitmap into the block_map
-	if( disk->ops->read(disk, block_map_base, sb.block_map_sz, &block_map) ) exit(1);
+	if( disk->ops->read(disk, block_map_base, sb.block_map_sz, block_map) ) exit(1);
 
 	/* The inode data is in the next set of blocks */
 	//CS492: your code below
@@ -459,7 +459,7 @@ void* fs_init(struct fuse_conn_info *conn)
 
 	// Read n_inodes block from disk at inode block into the inodes
 	// Changed n_inodes to 1
-	if( disk->ops->read(disk, inode_base, sb.inode_region_sz, &inodes) ) exit(1);
+	if( disk->ops->read(disk, inode_base, sb.inode_region_sz, inodes) ) exit(1);
 
 	// number of blocks on device
 	n_blocks = sb.num_blocks; // Set number of blocks from the superblock
