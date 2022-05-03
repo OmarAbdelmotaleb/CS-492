@@ -1148,9 +1148,9 @@ static size_t fs_read_indir2(size_t blk, char *buf, size_t len, size_t offset) {
  * @param fi: fuse file info
  *
  * @return: return exactly the number of bytes requested, except:
- * - if offset >= file len, return 0 
- * - if offset+len > file len, return bytes from offset to EOF
- * - on error, return <0 
+ * - if offset >= file len, return 0
+ * - if offset+len > file len, return bytes from offset to EOF (end of file)
+ * - on error, return <0
  * 	-ENOENT  - file does not exist ^
  * 	-EISDIR  - file is in fact a directory ^
  * 	-ENOTDIR - component of path not a directory ^
@@ -1165,9 +1165,6 @@ static size_t fs_read_indir2(size_t blk, char *buf, size_t len, size_t offset) {
 static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		    struct fuse_file_info *fi)
 {
-	//CS492: your code here
-	// fs_write doesnt return -ENOTDIR anywhere. Mistake?
-
 	char *_path = strdup(path);
 	char name[FS_FILENAME_SIZE];
 	int inode_idx = translate(_path);
@@ -1180,8 +1177,21 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	size_t len_to_read = len;
 
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
-	//if (inode_idx < 0) return inode_idx;
 	if (S_ISDIR(inode->mode)) return -EISDIR;
+
+	// Question: Should the exceptions checks be before or after the reads
+	if (offset >= file_len) {
+		return 0;
+	}
+
+	if (offset+len > file_len) {
+		return file_len - offset;
+	}
+
+
+	if (offset+len > file_len) {
+		len = file_len - offset;
+	}
 
 	// if (len_to_read > file_len) {
 	// 	return -EIO;
@@ -1212,12 +1222,13 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		len_to_read -= temp;
 		offset += len_to_read;
 	}
+
 	printf("Fourth\n");
-	if (offset >= file_len) return 0;
+	//if (offset >= file_len) return 0;
 	printf("Fifth\n");
-	if (offset+len > file_len) return (int) len - offset; // To EOF?
+	//if (offset+len > file_len) return -1 //(int) len - offset; // To EOF?
 	printf("Sixth\n");
-	return (int) len;
+	return (int) len - len_to_read;
 }
 
 static void fs_write_blk(int blk_num, const char *buf, size_t len, size_t offset) {
