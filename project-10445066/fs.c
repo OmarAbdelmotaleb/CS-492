@@ -1220,7 +1220,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		len_to_read -= temp;
 		offset += len_to_read;
 	}
-	
+	printf("Return value %d\n", (int)(len-len_to_read));
 	return (int) (len - len_to_read);
 }
 
