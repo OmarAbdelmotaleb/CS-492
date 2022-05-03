@@ -1221,8 +1221,8 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		offset += len_to_read;
 	}
 	printf("Return value %d\n", (int)(len-len_to_read));
-	printf("len: %d\n", len);
-	printf("len_to_read: %d\n", len_to_read);
+	printf("len: %zu\n", len);
+	printf("len_to_read: %zu\n", len_to_read);
 	return (int) (len - len_to_read);
 }
 
