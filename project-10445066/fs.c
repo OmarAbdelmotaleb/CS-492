@@ -1190,7 +1190,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	// if (len_to_read > file_len) {
 	// 	return -EIO;
 	// }
-	
+
 	printf("First\n");
 	//read direct blocks
 	if (len_to_read > 0 && offset < DIR_SIZE) {
@@ -1221,10 +1221,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	printf("Fourth\n");
 	printf("Value: %zu\n",(int) len - len_to_read);
 	
-	update_inode(inode_idx);
-	update_blk();
-	
-	return (int) len - len_to_read;
+	return (int) (len - len_to_read);
 }
 
 static void fs_write_blk(int blk_num, const char *buf, size_t len, size_t offset) {
