@@ -1184,11 +1184,6 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
 	int file_len = inode->size;
 
-	//len need to read
-	printf("len: %zu\n", len);
-	size_t len_to_read = len;
-	printf("len: %zu\n", len);
-	printf("len_to_read before: %zu\n", len_to_read);	
 
 	if (inode_idx < 0) return inode_idx;
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
@@ -1201,6 +1196,10 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	if (offset+len > file_len) {
 		len = (size_t) (file_len - offset);
 	}
+
+	
+	//len need to read
+	size_t len_to_read = len;
 
 	//read direct blocks
 	if (len_to_read > 0 && offset < DIR_SIZE) {
