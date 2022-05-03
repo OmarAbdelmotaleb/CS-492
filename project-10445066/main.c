@@ -587,6 +587,7 @@ static int do_show(char *argv[])
 		fwrite(blkbuf, len, 1, stdout);
 		offset += len;
 	}
+	printf("Len: %i\n", len);
 	fs_ops.release(path, &info);
 	return (len >= 0) ? 0 : len;
 }
