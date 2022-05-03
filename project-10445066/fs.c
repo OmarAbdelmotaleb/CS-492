@@ -1061,7 +1061,7 @@ static void fs_read_blk(int blk_num, char *buf, size_t len, size_t offset) {
 	char entries[BLOCK_SIZE];
 	memset(entries, 0, BLOCK_SIZE);
 	if (disk->ops->read(disk, blk_num, 1, entries) < 0) exit(1);
-	memcpy(entries + offset, buf, len);
+	memcpy(buf, entries + offset, len);
 }
 
 static size_t fs_read_dir(size_t inode_idx, char *buf, size_t len, size_t offset) {
