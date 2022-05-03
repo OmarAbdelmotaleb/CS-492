@@ -694,6 +694,7 @@ static int fs_mkdir(const char *path, mode_t mode)
 
 	//get current and parent inodes
 	if (get_free_inode() == -ENOSPC) {
+		printf("HI 2\n");
 		return -ENOSPC;
 	}
 
