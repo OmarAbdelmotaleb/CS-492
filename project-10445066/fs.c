@@ -1185,7 +1185,10 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	int file_len = inode->size;
 
 	//len need to read
+	printf("len: %zu\n", len);
 	size_t len_to_read = len;
+	printf("len: %zu\n", len);
+	printf("len_to_read before: %zu\n", len_to_read);	
 
 	if (inode_idx < 0) return inode_idx;
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
