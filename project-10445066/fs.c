@@ -885,7 +885,7 @@ static int fs_rmdir(const char *path)
 	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
 	if (inode_idx < 0 || parent_inode_idx < 0) return -ENOENT;
 	
-	if (!S_ISDIR(_path)) return -ENOTDIR;
+	if (!S_ISDIR(inode_idx)) return -ENOTDIR;
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
 
 
