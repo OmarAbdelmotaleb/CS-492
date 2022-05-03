@@ -1184,7 +1184,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	}
 
 	if (offset+len > file_len) {
-		len = file_len - offset;
+		len = (size_t) (file_len - offset);
 	}
 
 	// if (len_to_read > file_len) {
@@ -1199,6 +1199,8 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		size_t temp = fs_read_dir(inode_idx, buf, len_to_read, (size_t) offset);
 		len_to_read -= temp;
 		offset += temp;
+		
+		// Do we need to set something for buf? Like buf = something?
 		buf += temp;
 		printf("Direct\n");
 	}
