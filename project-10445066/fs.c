@@ -680,9 +680,9 @@ static int fs_mknod(const char *path, mode_t mode, dev_t dev)
  * @return: 0 if successful, or -error number
  * 	-ENOTDIR  - component of path not a directory ^
  * 	-EEXIST   - file already exists ^
- * 	-ENOSPC   - free inode not available
- * 	-ENOSPC   - results in >32 entries in directory
- *
+ * 	-ENOSPC   - free inode not available ^
+ * 	-ENOSPC   - results in >32 entries in directory ^
+ * 
  * Note: fs_mkdir is the same as fs_mknod except that fs_mknod creates
  * a regular file while fs_mkdir creates a directory.  See also the
  * last argument of set_attributes_and_update.
@@ -693,6 +693,10 @@ static int fs_mkdir(const char *path, mode_t mode)
 	// Derived from fs_mknod with adjustments to create a directory
 
 	//get current and parent inodes
+	if (get_free_inode() == -ENOSPC) {
+		return -ENOSPC;
+	}
+
 	mode |= S_IFDIR;
 	if (!S_ISDIR(mode) || strcmp(path, "/") == 0) return -EINVAL;
 	char *_path = strdup(path);
@@ -706,7 +710,10 @@ static int fs_mkdir(const char *path, mode_t mode)
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR; 
 
 	struct fs_dirent entries[DIRENTS_PER_BLK]; //Should this be INODES_PER_BLK instead?
-	// Also, what/where is entries?
+	if (find_free_dir(entries) == -ENOSPC) {
+		return -ENOSPC;
+	}
+
 	memset(entries, 0, DIRENTS_PER_BLK * sizeof(struct fs_dirent));
 	if (disk->ops->read(disk, parent_inode->direct[0], 1, entries) < 0)
 		exit(1);
