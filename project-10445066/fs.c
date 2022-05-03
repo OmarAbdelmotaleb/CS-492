@@ -1185,11 +1185,6 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	}
 
 	if (offset+len > file_len) {
-		return file_len - offset;
-	}
-
-
-	if (offset+len > file_len) {
 		len = file_len - offset;
 	}
 
