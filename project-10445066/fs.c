@@ -1179,7 +1179,6 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
 	if (S_ISDIR(inode->mode)) return -EISDIR;
 
-	// Question: Should the exceptions checks be before or after the reads
 	if (offset >= file_len) {
 		return 0;
 	}
@@ -1223,6 +1222,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	printf("Fifth\n");
 	//if (offset+len > file_len) return -1 //(int) len - offset; // To EOF?
 	printf("Sixth\n");
+	printf("Value: %d",(int) len - len_to_read);
 	return (int) len - len_to_read;
 }
 
