@@ -709,8 +709,10 @@ static int fs_mkdir(const char *path, mode_t mode)
 	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR; 
 
-	struct fs_dirent entries[DIRENTS_PER_BLK]; //Should this be INODES_PER_BLK instead?
+	struct fs_dirent entries[DIRENTS_PER_BLK]; 
+	
 	if (find_free_dir(entries) == -ENOSPC) {
+		printf("HI\n");
 		return -ENOSPC;
 	}
 
@@ -894,7 +896,6 @@ static int fs_rmdir(const char *path)
 	
 	if (!S_ISDIR(inode->mode)) return -ENOTDIR;
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
-
 
 	//check if dir if empty
 	struct fs_dirent entries[DIRENTS_PER_BLK];
