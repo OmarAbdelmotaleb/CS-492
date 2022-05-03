@@ -1155,7 +1155,7 @@ static size_t fs_read_indir2(size_t blk, char *buf, size_t len, size_t offset) {
  * 	-ENOENT  - file does not exist ^
  * 	-EISDIR  - file is in fact a directory ^
  * 	-ENOTDIR - component of path not a directory ^
- * 	-EIO     - error reading block ^
+ * 	-EIO     - error reading block
  *
  * Note: similar to fs_write, except that:
  * 1) we cannot read past the end of the file (so you need to add a test
