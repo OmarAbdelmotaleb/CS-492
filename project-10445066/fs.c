@@ -712,10 +712,10 @@ static int fs_mkdir(const char *path, mode_t mode)
 
 	struct fs_dirent entries[DIRENTS_PER_BLK]; 
 	
-	if (find_free_dir(entries) == -ENOSPC) {
-		printf("HI\n");
-		return -ENOSPC;
-	}
+	// if (find_free_dir(entries) == -ENOSPC) {
+	// 	printf("HI\n");
+	// 	return -ENOSPC;
+	// }
 
 	memset(entries, 0, DIRENTS_PER_BLK * sizeof(struct fs_dirent));
 	if (disk->ops->read(disk, parent_inode->direct[0], 1, entries) < 0)
