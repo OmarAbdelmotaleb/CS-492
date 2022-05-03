@@ -1198,6 +1198,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		len_to_read -= temp;
 		offset += temp;
 		buf += temp;
+		printf("Direct\n");
 	}
 
 	printf("Second\n");
@@ -1208,6 +1209,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		len_to_read -= temp;
 		offset += temp;
 		buf += temp;
+		printf("Indirect 1\n");
 	}
 	printf("Third\n");
 
@@ -1216,6 +1218,7 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		size_t temp = fs_read_indir2(inode->indir_2, buf, len_to_read, (size_t) offset - DIR_SIZE - INDIR1_SIZE);
 		len_to_read -= temp;
 		offset += len_to_read;
+		printf("Indirect 2\n");
 	}
 
 	printf("Fourth\n");
