@@ -1191,6 +1191,8 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	// 	return -EIO;
 	// }
 
+	printf("Offset: %zu\n, DIR_SIZE: %i\n, INDIR1: %i\n, INDIR2: %i\n", offset, DIR_SIZE, INDIR1_SIZE, INDIR2_SIZE);
+
 	printf("First\n");
 	//read direct blocks
 	if (len_to_read > 0 && offset < DIR_SIZE) {
@@ -1200,7 +1202,6 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 		buf += temp;
 		printf("Direct\n");
 	}
-
 	printf("Second\n");
 
 	//read indirect 1 blocks
