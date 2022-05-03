@@ -678,8 +678,8 @@ static int fs_mknod(const char *path, mode_t mode, dev_t dev)
  * @param mode: the mode for the new directory
  *
  * @return: 0 if successful, or -error number
- * 	-ENOTDIR  - component of path not a directory
- * 	-EEXIST   - file already exists
+ * 	-ENOTDIR  - component of path not a directory ^
+ * 	-EEXIST   - file already exists ^
  * 	-ENOSPC   - free inode not available
  * 	-ENOSPC   - results in >32 entries in directory
  *
@@ -860,10 +860,10 @@ static int fs_unlink(const char *path)
  * @param path: the path of the directory
  *
  * @return: 0 if successful, or -error number
- * 		-ENOENT   - file does not exist
- *  	-ENOTDIR  - component of path not a directory
- *  	-ENOTDIR  - path not a directory
- *  	-ENOEMPTY - directory not empty
+ * 		-ENOENT   - file does not exist ^
+ *  	-ENOTDIR  - component of path not a directory ^
+ *  	-ENOTDIR  - path not a directory 
+ *  	-ENOEMPTY - directory not empty ^
  *
  * Note: this is similar to deleting a file, except that we delete
  * a directory.
@@ -885,6 +885,7 @@ static int fs_rmdir(const char *path)
 	struct fs_inode *parent_inode = &inodes[parent_inode_idx];
 	if (inode_idx < 0 || parent_inode_idx < 0) return -ENOENT;
 	
+	if (!S_ISDIR(path)) return -ENOTDIR;
 	if (!S_ISDIR(parent_inode->mode)) return -ENOTDIR;
 
 
