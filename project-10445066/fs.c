@@ -692,11 +692,11 @@ static int fs_mkdir(const char *path, mode_t mode)
 
 	// Derived from fs_mknod with adjustments to create a directory
 
-	//get current and parent inodes
-	if (get_free_inode() == -ENOSPC) {
-		printf("HI 2\n");
-		return -ENOSPC;
-	}
+	// //get current and parent inodes
+	// if (get_free_inode() == -ENOSPC) {
+	// 	printf("HI 2\n");
+	// 	return -ENOSPC;
+	// }
 
 	mode |= S_IFDIR;
 	if (!S_ISDIR(mode) || strcmp(path, "/") == 0) return -EINVAL;
