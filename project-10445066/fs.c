@@ -1202,7 +1202,10 @@ static int fs_read(const char *path, char *buf, size_t len, off_t offset,
 	//read direct blocks
 	if (len_to_read > 0 && offset < DIR_SIZE) {
 		size_t temp = fs_read_dir(inode_idx, buf, len_to_read, (size_t) offset);
+		printf("temp: %zu\n", temp);
+		printf("len_to_read before: %zu\n", len_to_read);
 		len_to_read -= temp;
+		printf("len_to_read after: %zu\n", len_to_read);
 		offset += temp;
 		buf += temp;
 	}
